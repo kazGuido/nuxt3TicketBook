@@ -5,4 +5,7 @@ export default defineNuxtConfig({
     // prerender index route by default
     '/': { prerender: true },
   },
+  nitro: {
+    debug: true,
+  },
 });
