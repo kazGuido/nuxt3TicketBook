@@ -1,50 +1,59 @@
 <template>
-  <div class="events-container">
-    <h1>Events</h1>
-    <!-- Category Filter -->
-    <select v-model="selectedCategory" @change="fetchEvents">
-      <option value="">All Categories</option>
-      <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
-    </select>
-
-    <!-- Events List -->
-    <div v-if="events.length">
-      <div v-for="event in events" :key="event.id" class="event">
-        <h2>{{ event.name }}</h2>
-        <p>{{ event.description }}</p>
-        <p>Date: {{ new Date(event.date).toLocaleDateString() }}</p>
-        <p>Location: {{ event.location }}</p>
-        <p>Tickets Remaining: {{ event.tickets_remaining }}</p>
+  <div class="events-container p-4">
+    <h1 class="text-3xl font-bold mb-4">Events</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-for="event in events" :key="event.id" class="card card-bordered shadow-lg">
+        <figure>
+          <img src="https://via.placeholder.com/400x200" alt="Event" />
+        </figure>
+        <div class="card-body">
+          <h2 class="card-title">{{ event.name }}</h2>
+          <p>{{ event.description }}</p>
+          <p>Date: {{ formatDate(event.date) }}</p>
+          <p>Location: {{ event.location }}</p>
+          <p>Tickets Remaining: {{ event.tickets_remaining }}</p>
+        </div>
       </div>
-    </div>
-    <div v-else>
-      <p>No events found.</p>
     </div>
   </div>
 </template>
+
 <script setup>
-import { ref } from 'vue';
-import { useFetch } from 'nuxt/app';
+import { ref, onMounted } from 'vue';
 
-const selectedCategory = ref('');
-const { data: events, execute: fetchEvents } = useFetch('https://8f7532c3-ae66-446a-9029-19b1eeebab3b-00-30hfb3eka4tfa.kirk.replit.dev/events', {
-  params: {
-    category: selectedCategory.value
-  }
-}).json();
+const events = ref([]);
 
-// Example categories (could also be fetched from the API)
-const categories = ref(['Music', 'Sports', 'Technology']);
+// Function to format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+};
 
-// Fetch events whenever the selected category changes
-watch(selectedCategory, () => {
-  fetchEvents({
-    params: {
-      category: selectedCategory.value
+onMounted(async () => {
+  try {
+    const response = await fetch('https://8f7532c3-ae66-446a-9029-19b1eeebab3b-00-30hfb3eka4tfa.kirk.replit.dev/events');
+
+    // Log the full response object
+    console.log(response);
+
+    // Check if the response is ok (status in the range 200-299)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  });
+
+    const data = await response.json();
+
+    // Log the response body
+    console.log(data);
+
+    events.value = data.events;
+  } catch (error) {
+    console.error("Fetching events failed:", error);
+  }
 });
 </script>
+
+
 <style scoped>
 .events-container {
   max-width: 800px;

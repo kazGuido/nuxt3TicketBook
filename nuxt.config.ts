@@ -8,4 +8,5 @@ export default defineNuxtConfig({
   nitro: {
     debug: true,
   },
+  css: ['~/assets/css/main.css'],
 });
